@@ -26,7 +26,7 @@ var (
 			Name: "webhook_injections_total",
 			Help: "A count of total mutations/injections into a resource",
 		},
-		[]string{"prefix", "status"},
+		[]string{"prefix", "gitHash", "chartVersion", "status"},
 	)
 
 	httpRequestsInFlight = prometheus.NewGauge(
@@ -102,6 +102,6 @@ func GetHTTPMetricHandler(handlerName string, handler http.Handler) http.Handler
 }
 
 // CountInjection increments the webhookInjectionsTotal metric with the given name and status labels
-func CountInjection(prefix, status string) {
-	webhookInjectionsTotal.With(prometheus.Labels{"prefix": prefix, "status": status}).Inc()
+func CountInjection(prefix, gitHash, chartVersion, status string) {
+	webhookInjectionsTotal.With(prometheus.Labels{"prefix": prefix, "gitHash": gitHash, "chartVersion": chartVersion, "status": status}).Inc()
 }

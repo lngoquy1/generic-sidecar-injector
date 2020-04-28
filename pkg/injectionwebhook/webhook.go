@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"text/template"
 
@@ -245,15 +246,19 @@ func (whsvr *WebhookServer) serve(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("could not write response: %v", err), http.StatusInternalServerError)
 	}
 
+	gitHash := os.Getenv("GIT_HASH")
+	chartVersion := os.Getenv("CHART_VERSION")
+	glog.Infof("The webhook's latest git commit hash is %s, chart version %s", gitHash, chartVersion)
+
 	if statusForMutations != nil {
 		for m, s := range statusForMutations {
 			switch s {
 			case failedMutation:
-				metrics.CountInjection(m, injectionStatusFailure)
+				metrics.CountInjection(m, gitHash, chartVersion, injectionStatusFailure)
 			case skippedMutation:
-				metrics.CountInjection(m, injectionStatusSkipped)
+				metrics.CountInjection(m, gitHash, chartVersion, injectionStatusSkipped)
 			case succeededMutation:
-				metrics.CountInjection(m, injectionStatusSuccess)
+				metrics.CountInjection(m, gitHash, chartVersion, injectionStatusSuccess)
 			}
 		}
 	}
